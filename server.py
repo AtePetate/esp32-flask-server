@@ -42,7 +42,6 @@ def receive_sensor():
             if history_key not in all_data:
                 all_data[history_key] = []
 
-            # Voeg nieuwe waarde toe aan history (max 14 dagen = max 14 entries)
             all_data[history_key].append({
                 "date": datetime.now().strftime("%d-%m-%Y"),
                 "value": raw_value
@@ -54,7 +53,6 @@ def receive_sensor():
             # Update actuele waarde
             all_data[sensor_key] = raw_value
 
-    # Sla op
     write_data(all_data)
     return jsonify({"message": "✅ Sensor data ontvangen en opgeslagen!"})
 
@@ -62,6 +60,29 @@ def receive_sensor():
 def get_sensor_data():
     all_data = read_data()
     return jsonify(all_data)
+
+@app.route('/log', methods=['POST'])
+def receive_log():
+    data = request.json
+    plant_name = data.get('plant_name')
+    log_entry = data.get('log')
+
+    if not plant_name or not log_entry:
+        return jsonify({"error": "Missing plant_name or log"}), 400
+
+    all_data = read_data()
+
+    log_key = f'log_{plant_name}'
+    if log_key not in all_data:
+        all_data[log_key] = []
+
+    all_data[log_key].append({
+        "date": datetime.now().strftime("%d-%m-%Y %H:%M"),
+        "entry": log_entry
+    })
+
+    write_data(all_data)
+    return jsonify({"message": "✅ Logregel opgeslagen!"})
 
 @app.route('/plants', methods=['GET', 'POST'])
 def plants():
