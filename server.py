@@ -84,6 +84,13 @@ def receive_log():
     write_data(all_data)
     return jsonify({"message": "✅ Logregel opgeslagen!"})
 
+@app.route('/logs/<plant_name>', methods=['GET'])
+def get_logs(plant_name):
+    all_data = read_data()
+    log_key = f'log_{plant_name}'
+    logs = all_data.get(log_key, [])
+    return jsonify(logs)
+
 @app.route('/plants', methods=['GET', 'POST'])
 def plants():
     if request.method == 'GET':
